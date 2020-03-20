@@ -1,3 +1,4 @@
-prog
+prog*
 *.o
 sujets-aoa-20.pdf
+maqao_*/

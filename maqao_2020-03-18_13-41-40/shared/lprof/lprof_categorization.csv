@@ -1,5 +1,0 @@
-Node;Process;Thread;System (%);Binary (%);Time (s);Math (%);OMP (%);String (%);Others (%);IO (%);Memory (%);MPI (%);Pthread (%);
-_ALL;_ALL;_ALL;0.34;54.6;99.38;45.06;0;0;0;0;0;0;0;
-Ascab;_ALL;_ALL;0.34;54.6;99.38;45.06;0;0;0;0;0;0;0;
-Ascab;4243;_ALL;0.34;54.6;99.38;45.06;0;0;0;0;0;0;0;
-Ascab;4243;4243;0.34;54.6;99.38;45.06;0;0;0;0;0;0;0;

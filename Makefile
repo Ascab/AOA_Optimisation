@@ -1,20 +1,21 @@
 CC =gcc
+OPTI =-O3
 OBJ =driver.o kernel.o rdtsc.o
-OPTI =-O2
 CFLAGS =-Wall -g
 LDFLAGS =-lm
+EXE=prog
 
-all:		prog
-prog:		driver.o kernel.o rdtsc.o
+all:		$(EXE)
+$(EXE):		$(OBJ)
 	$(CC) -o $@ $^ -lm
 
 kernel.o: 	kernel.c
-	$(CC) $(CFLAGS) $(OPTI) -lm -c $< -o $@
+	$(CC) $(OPTI) $(CFLAGS) -c $< -o $@
 driver.o:	driver.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) -c $< -o $@ $(CFLAGS)
 rdtsc.o:	rdtsc.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) -c $< -o $@ $(CFLAGS)
 clean:
-	rm -rf $(OBJ)
+	rm -rf *.o
 mrproper: clean
-	rm -f prog
+	rm -f prog*

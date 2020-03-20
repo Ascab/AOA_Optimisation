@@ -1,8 +1,0 @@
-oneview.local_vars.analyzed_binaries = {}
-oneview.local_vars.analyzed_binaries["one"] = {}
-oneview.local_vars.instances_per_bucket = 31
-oneview.local_vars.one_lprof_date = "2020-03-18"
-oneview.local_vars.min_time_obj = 0.1
-oneview.local_vars.global_instances_per_bucket = 31
-oneview.local_vars.one_lprof_timestamp = "2020-03-18 13:39:55"
-oneview.local_vars.one_lprof_hour = "13:39:55"

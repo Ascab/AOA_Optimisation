@@ -1,2 +1,0 @@
-node;pid;total_cycles;mpi_cycles;omp_cycles;sum_walltime;thread_cycles;sum_insns;
-Ascab;4243;258400387600;0;0;99.384765625;0;0;
