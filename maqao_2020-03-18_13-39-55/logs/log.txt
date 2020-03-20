@@ -1,0 +1,8 @@
+********************************************************************************
+
+maqao oneview --create-report=one binary=prog run_command=prog 300 100 30 
+
+Info: OMP_NUM_THREADS not set, it will be considered as equal to 1
+CMD:  OMP_NUM_THREADS=1   /usr/local/bin/maqao lprof  --xp=/home/ascab/Documents/Architecture/AOA/Projet/maqao_2020-03-18_13-39-55/lprof_npsu/ --mpi-command=""   -- prog 300 100 30
+###   ERROR 65280   ###
+

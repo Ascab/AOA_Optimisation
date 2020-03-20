@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#define NB_MESURES 31
-#define NB_REPET 31
+#define NB_MESURES 2
+#define NB_REPET 100
 extern uint64_t rdtsc ();
 
 void init_array(size_t size, float *tab);
@@ -27,23 +27,23 @@ int main()
         init_array(n, c);
         init_array(20, d);
     //warmup
-    if(!i)
-    {
-        for (int j ; j < 10 ; j++)
+        if(!i)
         {
-            baseline(n, a,b,c,d);
+            for (int j ; j < 10 ; j++)
+            {
+                baseline(n, a,b,c,d);
+            }
         }
-    }
-    else
-        baseline(n, a,b,c,d);
+        else
+            baseline(n, a,b,c,d);
 
-    //performances mesures
-    uint64_t t1 = rdtsc();
-    for (int k = 0 ; k < NB_REPET ; k++)
-        baseline(n, a,b,c,d);
-    uint64_t t2 = rdtsc();
-    //print performances
-    printf("%.2f cycles/itération \n", (t1-t2 )/ ((float) n * n *  NB_REPET));
+        //performances mesures
+        uint64_t t1 = rdtsc();
+        for (int k = 0 ; k < NB_REPET ; k++)
+            baseline(n, a,b,c,d);
+        uint64_t t2 = rdtsc();
+        //print performances
+        printf("%.2f cycles/itération \n", (float)(t2-t1 ) / ((float) n *  NB_REPET));
     }
     //free tab
     free(a);

@@ -4,7 +4,7 @@ float c [ n ] , float d [20])
 {
     unsigned k , i ;
     // all elements in b are assumed positive
-    for ( k =0; k <20; k ++)
+    for ( k =0; k < 20; k ++)
     {
         for ( i =0; i < n ; i ++)
         {

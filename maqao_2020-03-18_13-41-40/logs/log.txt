@@ -1,0 +1,11 @@
+********************************************************************************
+
+maqao oneview --create-report=one binary=prog run_command=<binary> 300 100 30 
+
+Info: OMP_NUM_THREADS not set, it will be considered as equal to 1
+CMD:  OMP_NUM_THREADS=1   /usr/local/bin/maqao lprof  --xp=/home/ascab/Documents/Architecture/AOA/Projet/maqao_2020-03-18_13-41-40/lprof_npsu/ --mpi-command=""   -- /home/ascab/Documents/Architecture/AOA/Projet/maqao_2020-03-18_13-41-40/binary 300 100 30
+In prog, 2 loops, covering 53.34% of total execution time
+      were discarded due to missing debug symbols.
+
+To include them, please rerun with -force-all-loops
+
