@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 //ARGV[1] = n_warmup
 //ARGV[2] = n_mesures
 //ARGV[3] = n_repet
@@ -12,13 +13,17 @@ void baseline ( unsigned n , float a [ n ] , float b [ n ] ,
 float c [ n ] , float d [20]) ;
 int main(int argc, char *argv[])
 {
+	FILE *fileFD;
 	if(argc != 5){
 		exit(1);
 	}
+	char path[40];
+	strcpy(path, argv[0]);
+	fileFD = fopen(strcat(path,"res.csv"),"a");
     size_t n;
     int i;
     float *a,*b,*c,d[20] ;
-    
+
     int n_warmup = atoi(argv[1]);
 	int n_mesures = atoi(argv[2]);
 	int n_repet = atoi(argv[3]);
@@ -53,6 +58,7 @@ int main(int argc, char *argv[])
         uint64_t t2 = rdtsc();
         //print performances
         printf("%.2f cycles/itération \n", (float)(t2-t1 ) / ((float) n *  n_repet));
+		fprintf(fileFD,"%s;%.2f", argv[0], (t2-t1 ) / ((float) n *  n_repet * n));
     }
     //free tab
     free(a);
