@@ -18,7 +18,88 @@ float a_i_mul( float b ,float * restrict d)
     }
     return a;
 }
+/*
+void baseline_vect_hoist_interchange( unsigned n , float * restrict a  , float * restrict b ,
+float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
+{
+    // all elements in b are assumed positive
+    /*
+	float *al=__builtin_assume_aligned(a,32);
+	float *bl=__builtin_assume_aligned(b,32);
+	float *cl=__builtin_assume_aligned(c,32);
+	float *dl=__builtin_assume_aligned(d,32);
+	
+	* 
+	unsigned k , i ;
+	#pragma ivdep
+	#pragma  vector aligned
+    for( i =0; i < n ; i ++)
+    {
+		if (b [ i ] < 1.0)
+		{
+			float r=0.0;
+			#pragma ivdep
+			#pragma  vector aligned
+			for ( k =0; k < 20; k ++) 
+			{
+				r += exp (d [ k ]); // c [ i ];
+			}
+			r*=exp(b[i]);
+			a[i]+=r;
+		}
+		else
+		{	
+			float r=0.0;
+			#pragma ivdep
+			#pragma  vector aligned
+			for ( k =0; k < 20; k ++) 
+			{
+					a [ i ] += ( b [ i ] * d [ k ]); // c [ i ];
+			}
+			r*=b[i];
+			a[i]+=r;
+		}
+		a[i]=a[i]/c[i];
+    }
+}*/
 
+void baseline_vect_hoist_interchange( unsigned n , float * restrict a  , float * restrict b ,
+float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
+{
+    // all elements in b are assumed positive
+    /*
+	float *al=__builtin_assume_aligned(a,32);
+	float *bl=__builtin_assume_aligned(b,32);
+	float *cl=__builtin_assume_aligned(c,32);
+	float *dl=__builtin_assume_aligned(d,32);
+	
+	*/ 
+	unsigned k , i ;
+	#pragma ivdep
+	#pragma  vector aligned
+    for( i =0; i < n ; i ++)
+    {
+		if (b [ i ] < 1.0)
+		{
+			#pragma ivdep
+			#pragma  vector aligned
+			for ( k =0; k < 20; k ++) 
+			{
+				a [ i ] += exp ( b [ i ] + d [ k ]); // c [ i ];
+			}
+		}
+		else
+		{	
+			#pragma ivdep
+			#pragma  vector aligned
+			for ( k =0; k < 20; k ++) 
+			{
+					a [ i ] += ( b [ i ] * d [ k ]); // c [ i ];
+			}
+		}
+		a[i]=a[i]/c[i];
+    }
+}
 
 void baseline_vect ( unsigned n , float * restrict a  , float * restrict b ,
 float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)

@@ -15,37 +15,39 @@ int main()
     size_t n;
     int i;
     float *a,*b,*c,*d ;
-	float *ap,*bp,*cp,dp[20] ;
+	float *ap,*bp,*cp,*dp ;
     n = 600000 ;
-    
+    /*
 		a = _mm_malloc(n*sizeof(float), 32);
 		b = _mm_malloc(n*sizeof(float), 32);
 		c = _mm_malloc(n*sizeof(float), 32);
 		d = _mm_malloc(20*sizeof(float), 32);
-		
+		*/
 		/*
 		a = (float*)malloc(n * sizeof(float));
 		b = (float*)malloc(n * sizeof(float));
 		c = (float*)malloc(n * sizeof(float));
 		*/
-		/*
-		ap = (float*)malloc(n * sizeof(float));
-		bp = (float*)malloc(n * sizeof(float));
-		cp = (float*)malloc(n * sizeof(float));
-		*/
+		
+		ap = _mm_malloc(n*sizeof(float), 32);//(float*)malloc(n * sizeof(float));
+		bp = _mm_malloc(n*sizeof(float), 32);//(float*)malloc(n * sizeof(float));
+		cp = _mm_malloc(n*sizeof(float), 32);//(float*)malloc(n * sizeof(float));
+		dp = _mm_malloc(20*sizeof(float), 32);
+		
     for(i = 0 ; i < NB_MESURES ; i++)
     {
         srand(42);
+        /*
         init_array(n, a);
         init_array(n, b);
         init_array(n, c);
         init_array(20, d);
-        /*
+        */
         init_array(n, ap);
         init_array(n, bp);
         init_array(n, cp);
         init_array(20, dp);
-        */
+        
         /*
         for(int k=0;k<n;k++)
         {
@@ -56,21 +58,24 @@ int main()
 		for(int k=0;k<20;k++)
         {
 			dp[i]=d[i];
-		}*/
-		//printf("Check: %f %f \n",a[0],ap[0]);
+		}
+		printf("Check: %f %f \n",a[0],ap[0]);
+		*/
     //warmup
         if(!i)
         {
             for (int j ; j < 10 ; j++)
             {
 				//baseline(n, ap,bp,cp,dp);
-                baseline_vect(n, a,b,c,d);
+				baseline_vect_hoist_interchange(n, ap,bp,cp,dp);
+                //baseline_vect(n, ap,bp,cp,dp);
             }
         }
         else
         {
             //baseline(n, ap,bp,cp,dp);
-            baseline_vect(n, a,b,c,d);
+            baseline_vect_hoist_interchange(n, ap,bp,cp,dp);
+            //baseline_vect(n, ap,bp,cp,dp);
         }
 
         //performances mesures
@@ -78,11 +83,12 @@ int main()
         for (int k = 0 ; k < NB_REPET ; k++)
         {
 			//baseline(n, ap,bp,cp,dp);
-            baseline_vect(n, a,b,c,d);
+			baseline_vect_hoist_interchange(n, ap,bp,cp,dp);
+            //baseline_vect(n, ap,bp,cp,dp);
         }
         uint64_t t2 = rdtsc();
         //print performances
-        printf("%.2f cycles/itération \n", (float)(t2-t1 ) / ((float) n *  NB_REPET));
+        printf("%.2f cycles/itération \n", (float)(t2-t1 ) / ((float) 20 * n *  NB_REPET));
         /*
         int valid=1;
         for(int k=0;k<n;k++)
@@ -104,11 +110,16 @@ int main()
 
     }
 		 //free tab
-		 
+		/* 
 		_mm_free(a);
 		_mm_free(b);
 		_mm_free(c);
 		_mm_free(d);
+		*/
+		_mm_free(ap);
+		_mm_free(bp);
+		_mm_free(cp);
+		_mm_free(dp);
 		
 		/*
 		free(a);

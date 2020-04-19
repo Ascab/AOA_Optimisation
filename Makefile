@@ -1,7 +1,7 @@
-CC =gcc
+CC =icc
 OPTI =-O3
 OBJ =driver.o kernel.o rdtsc.o
-CFLAGS =-Wall -g
+CFLAGS = -qopt-report=5 -qopt-report-phase=vec -xHost -Wall -g
 LDFLAGS =-lm
 EXE=prog
 
