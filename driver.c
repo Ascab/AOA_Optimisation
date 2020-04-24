@@ -2,74 +2,103 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-//ARGV[1] = n_warmup
-//ARGV[2] = n_mesures
-//ARGV[3] = n_repet
-//ARGV[4] = taille tab
+
+#include "common.h"
+
 extern uint64_t rdtsc ();
 
-void init_array(size_t size, float *tab);
-void baseline ( unsigned n , float a [ n ] , float b [ n ] ,
-float c [ n ] , float d [20]) ;
+void baseline ( unsigned n , float a [ n ] , float b [ n ] , float c [ n ] , float d [20]) ;
+void baseline_loop_swap ( unsigned n , float a [ n ] , float b [ n ] , float c [ n ] , float d [20]) ;
+void baseline_unroll ( unsigned n , float a [ n ] , float b [ n ] , float c [ n ] , float d [20]) ;
+
 int main(int argc, char *argv[])
 {
-	FILE *fileFD;
-	if(argc != 5){
-		exit(1);
-	}
-	char path[40];
-	strcpy(path, argv[0]);
-	fileFD = fopen(strcat(path,"res.csv"),"a");
-    size_t n;
     int i;
     float *a,*b,*c,d[20] ;
+    f64 cycles[N_MESURES];
+    uint64_t nb_bytes = N_REPET * TAILLE_TAB * 20;
 
-    int n_warmup = atoi(argv[1]);
-	int n_mesures = atoi(argv[2]);
-	int n_repet = atoi(argv[3]);
-    n = atoi(argv[4]) ;
-    a = (float*)malloc(n * sizeof(float));
-    b = (float*)malloc(n * sizeof(float));
-    c = (float*)malloc(n * sizeof(float));
+    a = (float*)malloc(TAILLE_TAB * sizeof(float));
+    b = (float*)malloc(TAILLE_TAB * sizeof(float));
+    c = (float*)malloc(TAILLE_TAB * sizeof(float));
 
 	srand(42);
-	init_array(n, a);
-	init_array(n, b);
-	init_array(n, c);
+	init_array(TAILLE_TAB, a);
+	init_array(TAILLE_TAB, b);
+	init_array(TAILLE_TAB, c);
 	init_array(20, d);
     //warmup
-	for (int j ; j < n_warmup ; j++)
+	for (int j = 0 ; j < N_WARMUP ; j++)
 	{
-		baseline(n, a,b,c,d);
+		baseline(TAILLE_TAB, a,b,c,d);
 	}
-
-    for(i = 0 ; i < n_mesures ; i++)
-    {
-        srand(42);
-        init_array(n, a);
-        init_array(n, b);
-        init_array(n, c);
-        init_array(20, d);
-
-        //performances mesures
-        uint64_t t1 = rdtsc();
-        for (int k = 0 ; k < n_repet ; k++)
-            baseline(n, a,b,c,d);
-        uint64_t t2 = rdtsc();
-        //print performances
-        printf("%.2f cycles/itération \n", (float)(t2-t1 ) / ((float) n *  n_repet));
-		fprintf(fileFD,"%s;%.2f", argv[0], (t2-t1 ) / ((float) n *  n_repet * n));
-    }
+	
     //free tab
     free(a);
     free(b);
     free(c);
-}
-void init_array(size_t size, float *tab )
-{
-    int i ;
-    for (i = 0 ; i < size ; i++)
+
+    for(i = 0 ; i < N_MESURES ; i++)
     {
-        tab[i] = rand() / RAND_MAX;
+		a = (float*)malloc(TAILLE_TAB * sizeof(float));
+		b = (float*)malloc(TAILLE_TAB * sizeof(float));
+		c = (float*)malloc(TAILLE_TAB * sizeof(float));
+		
+        srand(42);
+        init_array(TAILLE_TAB, a);
+        init_array(TAILLE_TAB, b);
+        init_array(TAILLE_TAB, c);
+        init_array(20, d);
+
+        //performances mesures
+        uint64_t t1 = rdtsc();
+        for (int k = 0 ; k < N_REPET ; k++)
+			#if BASELINE == 2
+				baseline_unroll(TAILLE_TAB, a,b,c,d);
+			#elif BASELINE == 1
+				baseline_loop_swap(TAILLE_TAB, a,b,c,d);
+			#else
+				baseline(TAILLE_TAB, a,b,c,d);
+			#endif
+        uint64_t t2 = rdtsc();
+        
+        uint64_t time = t2 - t1;
+		cycles[i] = (f64)(time) / (f64)(nb_bytes);
+		
+        //measures; number of elements; elapsed cycles; cycles per element
+        fprintf(stdout, "%20llu; %20llu; %20llu; %15.3lf\n", i, nb_bytes, time, (f64)(time) / (f64)(nb_bytes));
+        
+		//free tab
+		free(a);
+		free(b);
+		free(c);
     }
+    
+    //
+	sort(cycles, i);
+
+	//
+	f64 min, max, avg, mea, dev;
+
+	//
+	mea = mean(cycles, i);
+	  
+	//
+	dev = stddev(cycles, i);
+
+	//
+	min = cycles[0];
+	max = cycles[i - 1];
+	avg = (min + max) / 2.0;
+
+	//
+	fprintf(stderr, "\n\t\t\tmin: %5.3lf; max: %5.3lf; avg: %5.3lf; moy: %5.3lf; dev: %5.3lf %%;\n",
+		min,
+		max,
+		avg,
+		mea,
+		(dev * 100.0 / mea));
+	
+	return 0;
 }
+

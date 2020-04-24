@@ -1,33 +1,98 @@
 #!/bin/bash
-make mrproper
-make all CC=gcc OPTI=-O2 EXE=prog_gcc_O2
-rm kernel.o
-make all CC=gcc OPTI=-O3 EXE=prog_gcc_O3
-rm kernel.o
-make all CC=gcc OPTI=-"O3 -march=native" EXE=prog_gcc_O3_march=native
-rm kernel.o
-make all CC=icc OPTI=-O2 EXE=prog_icc_O2
-rm kernel.o
-make all CC=icc OPTI=-O3 EXE=prog_icc_O3
-rm kernel.o
-make all CC=icc OPTI="-xHost -O3" EXE=prog_icc_O3_xHost
-rm kernel.o
-for i in prog*
+
+#
+gnuplot --version >> "/dev/null"
+
+if [ $? -ne 0 ] 
+then
+    echo "Error: Cannot invoke GNUPLOT"
+    exit 1
+fi
+
+#
+echo -e "[BEGIN]\n"
+
+#cache levels
+for cache in "L1" "L2"
 do
-    #L1
-    maqao oneview --create-report=one binary=$i run_command="<binary> 10 50 1000 2000" --xp=maqao_L1_$i
-    likwid-perfctr -g L1CACHE taskset -c 3 ./$i 10 50 1000 2000 > likwidReport_$i.txt
-    firefox maqao_L1_$i/RESULTS/*_one_html/index.html&
-    #L2
-    maqao oneview --create-report=one binary=$i run_command="<binary> 10 10 50 20000" --xp=maqao_L2_$i
-    likwid-perfctr -g L2CACHE taskset -c 3 ./$i 10 10 50 20000 >> likwidReport_$i.txt
-    firefox maqao_L2_$i/RESULTS/*_one_html/index.html&
-    #L3
-    maqao oneview --create-report=one binary=$i run_command="<binary> 10 10 30 500000" --xp=maqao_L3_$i
-    likwid-perfctr -g L3CACHE taskset -c 3 ./$i 10 10 30 500000 >> likwidReport_$i.txt
-    firefox maqao_L3_$i/RESULTS/*_one_html/index.html&
-    #RAM
-    maqao oneview --create-report=one binary=$i run_command="<binary> 10 10 15  600000" --xp=maqao_RAM_$i
-    likwid-perfctr -g MEM_SP taskset -c 3 ./$i 10 10 15 600000 >> likwidReport_$i.txt
-    firefox maqao_RAM_$i/RESULTS/*_one_html/index.html&
+	#
+		echo "Running for cache: "$cache
+	
+	#
+	dir="Phase1_data_"$cache
+	mkdir -p $dir $dir"/logs"
+
+	#
+	cp "plot_all.gp" $dir
+
+	#Compiler optimizations
+	for comp in "gcc" "icc"
+	do
+		#
+		echo -e "\tRunning with compiler: "$comp
+		
+		#
+		mkdir -p $dir"/"$comp
+		mkdir -p $dir"/"$comp"/data"
+
+		#
+		cp "plot.gp" $dir"/"$comp
+		echo -n "plot " >> $dir"/"$comp"/plot.gp"
+		
+		#
+		echo -e "\n\nset title \""$comp" compiler\"" >> $dir"/plot_all.gp"
+		echo -n "plot " >> $dir"/plot_all.gp"
+		
+		#Going through invert code variants
+		for variant in "O2" "O3" "O3+" "O3+-unroll" "O3+-fast-math" "O3-total" "Ofast"
+		do
+			
+			#
+			echo -e "\t\tVariant: "$variant
+			
+			#Compile variant
+			make $cache"-"$variant CC=$comp CACHE=$cache >> $dir"/logs/compile.log" 2>> $dir"/logs/compile_err.log"
+			
+			#Run & select run number & cycles 
+			./prog | cut -d';' -f1,4 > $dir"/"$comp"/data/"$variant
+			
+			#Run with maqao
+			maqao oneview -R1 binary="prog" run_command="<binary>" lprof_params="--use-OS-timers" --xp=$dir"/maqao_"$cache"_"$comp"_"$variant >> $dir"/logs/maqao_reports.log"
+			
+			#setting individual plots
+			echo -n "\"data/"$variant"\" w lp, " >> $dir"/"$comp"/plot.gp"
+			
+			#setting general plot
+			echo -n "\""$comp"/data/"$variant"\" w lp t \""$variant"\", " >> $dir"/plot_all.gp"
+			
+			make mrproper >> $dir"/logs/compile.log" 2>> $dir"/logs/compile_err.log"
+			
+		done
+
+		#
+		cd $dir"/"$comp
+
+		#Generate the plot
+		gnuplot -c "plot.gp" > "plot_"$comp".png"
+
+		cd ../..
+
+		echo
+	done
+
+	#
+	cd $dir
+
+	#Generate the plot
+	echo -e "\n\nunset multiplot" >> "plot_all.gp"
+	gnuplot -c "plot_all.gp" > "plot_all.png" 
+
+	cd ..
+
+	#
+	make clean
+
 done
+
+#
+echo -e "\n[DONE]"
