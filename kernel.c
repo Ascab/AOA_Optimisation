@@ -27,7 +27,7 @@ int reduc_k_exp( float b ,float c , float * restrict d)
 	float r=0.0;
 	#pragma ivdep
 	#pragma vector aligned
-	for ( k =0; k < 20; k ++) 
+	for ( k =0; k < 20; k ++)
 	{
 		r  += exp ( b + d [ k ]); // c [ i ];
 	}
@@ -38,9 +38,9 @@ int reduc_k( float b ,float c , float * restrict d)
 {
 	unsigned k;
 	float r=0.0;
-	#pragma ivdep 
+	#pragma ivdep
 	#pragma vector aligned
-	for ( k =0; k < 20; k ++) 
+	for ( k =0; k < 20; k ++)
 	{
 		r  += d [ k ]; // c [ i ];
 	}
@@ -63,12 +63,50 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 			a[i]+=reduc_k_exp( b[i] , c[i] , d);
 		}
 		else
-		{	
+		{
 			a[i]+=reduc_k( b[i] , c[i] , d);
 		}
     }
 }
 */
+void baseline_vect_hoist_interchange_mem( unsigned n , float * restrict a  , float * restrict b ,
+float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
+{
+    // all elements in b are assumed positive
+	unsigned k , i ;
+	float bi=0.0,ci=0.0,ai=0.0;
+	#pragma ivdep
+	#pragma vector aligned
+	#pragma omp parallel for
+    for( i =0; i < n ; i ++)
+    {
+    ci=c[i];
+		ai=a[i]*ci;
+		bi=b[i];
+		if (bi < 1.0)
+		{
+			#pragma ivdep
+			#pragma vector aligned
+			for ( k =0; k < 20; k ++)
+			{
+				ai += expf (d [ k ]); // c [ i ];
+			}
+			#pragma unroll_and_jam (5)
+			a[i]=ai*expf(bi)/ci;
+		}
+		else
+		{
+			#pragma ivdep
+			#pragma vector aligned
+			for ( k =0; k < 20; k ++)
+			{
+				ai+= (d [ k ]); // c [ i ];
+			}
+			#pragma unroll_and_jam (5)
+			a[i]=ai*bi/ci;
+		}
+    }
+}
 
 void baseline_vect_hoist_interchange( unsigned n , float * restrict a  , float * restrict b ,
 float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
@@ -85,16 +123,16 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 		{
 			#pragma ivdep
 			#pragma vector aligned
-			for ( k =0; k < 20; k ++) 
+			for ( k =0; k < 20; k ++)
 			{
 				a [ i ] += exp ( b [ i ] + d [ k ]); // c [ i ];
 			}
 		}
 		else
-		{	
+		{
 			#pragma ivdep
 			#pragma vector aligned
-			for ( k =0; k < 20; k ++) 
+			for ( k =0; k < 20; k ++)
 			{
 					a [ i ] += ( b [ i ] * d [ k ]); // c [ i ];
 			}
@@ -112,8 +150,8 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 	float *bl=__builtin_assume_aligned(b,32);
 	float *cl=__builtin_assume_aligned(c,32);
 	float *dl=__builtin_assume_aligned(d,32);
-	
-	*/ 
+
+	*/
 	unsigned k , i ;
     for ( k =0; k < 20; k ++)
     {
@@ -131,7 +169,6 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
         }
     }
 }
-
 
 void baseline ( unsigned n , float a [ n ] , float b [ n ] ,
 float c [ n ] , float d [20])

@@ -2,3 +2,12 @@ prog*
 *.o
 sujets-aoa-20.pdf
 maqao_*/
+screenshots/
+Phase2_data*/
+*.optrpt
+likwidReport*
+results.zip
+*.advixeproj
+*.ods
+csvs/
+e000/

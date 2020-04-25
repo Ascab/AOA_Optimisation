@@ -4,142 +4,127 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 #include <mmintrin.h>
-#define NB_MESURES 31
-#define NB_REPET 31
+#include "common.h"
 extern uint64_t rdtsc ();
 
-void init_array(size_t size, float *tab);
 void baseline ( unsigned n , float a [ n ] , float b [ n ] ,
 float c [ n ] , float d [20]) ;
 void baseline_vect (const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d);
 void baseline_vect_hoist_interchange( unsigned n , float * restrict a  , float * restrict b ,float * restrict c , float * restrict d);
-int main()
+void baseline_vect_hoist_interchange_mem( unsigned n , float * restrict a  , float * restrict b ,float * restrict c , float * restrict d);
+
+int main(int argc, char *argv[])
 {
-    size_t n;
     int i;
-    float *a,*b,*c,*d ;
-	float *ap,*bp,*cp,*dp ;
-    n = 1500000 ;
-    /*
-		a = _mm_malloc(n*sizeof(float), 32);
-		b = _mm_malloc(n*sizeof(float), 32);
-		c = _mm_malloc(n*sizeof(float), 32);
-		d = _mm_malloc(20*sizeof(float), 32);
-		*/
-		/*
-		a = (float*)malloc(n * sizeof(float));
-		b = (float*)malloc(n * sizeof(float));
-		c = (float*)malloc(n * sizeof(float));
-		*/
-		
-		ap = _mm_malloc(n*sizeof(float), 32);//(float*)malloc(n * sizeof(float));
-		bp = _mm_malloc(n*sizeof(float), 32);//(float*)malloc(n * sizeof(float));
-		cp = _mm_malloc(n*sizeof(float), 32);//(float*)malloc(n * sizeof(float));
-		dp = _mm_malloc(20*sizeof(float), 32);
-		
-    for(i = 0 ; i < NB_MESURES ; i++)
-    {
-        srand(42);
-        /*
-        init_array(n, a);
-        init_array(n, b);
-        init_array(n, c); //
-        init_array(20, d);
-        */
-        init_array(n, ap);
-        init_array(n, bp);
-        init_array(n, cp);
-        init_array(20, dp);
-        
-        /*
-        for(int k=0;k<n;k++)
-        {
-			ap[i]=a[i];
-			bp[i]=b[i];
-			cp[i]=c[i];
-		}
-		for(int k=0;k<20;k++)
-        {
-			dp[i]=d[i];
-		}
-		printf("Check: %f %f \n",a[0],ap[0]);
-		*/
+    float *a,*b,*c,d[20] ;
+    f64 cycles[N_MESURES];
+    uint64_t nb_bytes = N_REPET * TAILLE_TAB * 20;
+
+    a = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+    b = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+    c = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+
+	srand(42);
+	init_array(TAILLE_TAB, a);
+	init_array(TAILLE_TAB, b);
+	init_array(TAILLE_TAB, c);
+	init_array(20, d);
     //warmup
-        if(!i)
-        {
-            for (int j ; j < 10 ; j++)
-            {
-				//baseline(n, ap,bp,cp,dp);
-				baseline_vect_hoist_interchange(n, ap,bp,cp,dp);
-                //baseline_vect(n, a,b,c,d);
-            }
-        }
-        else
-        {
-            //baseline(n, ap,bp,cp,dp);
-            baseline_vect_hoist_interchange(n, ap,bp,cp,dp);
-            //baseline_vect(n, a,b,c,d);
-        }
+	for (int j = 0 ; j < N_WARMUP ; j++)
+	{
+    #if BASELINE
+    baseline(TAILLE_TAB, a,b,c,d);
+    #endif
+    #if BASELINE_VECT_HOIST_INTERCHANGE
+    baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
+    #endif
+    #if BASELINE_VECT
+    baseline_vect(TAILLE_TAB, a,b,c,d);
+    #endif
+    #if BASELINE_VECT_HOIST_INTERCHANGE_MEM
+    baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
+    #endif
+	}
+
+    //free tab
+    _mm_free(a);
+    _mm_free(b);
+    _mm_free(c);
+
+    for(i = 0 ; i < N_MESURES ; i++)
+    {
+		a = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+		b = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+		c = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+
+        srand(42);
+        init_array(TAILLE_TAB, a);
+        init_array(TAILLE_TAB, b);
+        init_array(TAILLE_TAB, c);
+        init_array(20, d);
 
         //performances mesures
         uint64_t t1 = rdtsc();
-        for (int k = 0 ; k < NB_REPET ; k++)
-        {
-			//baseline(n, ap,bp,cp,dp);
-			baseline_vect_hoist_interchange(n, ap,bp,cp,dp);
-            //baseline_vect(n, a,b,c,d);
-        }
+        for (int k = 0 ; k < N_REPET ; k++){
+        #if BASELINE
+        baseline(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if BASELINE_VECT_HOIST_INTERCHANGE
+        baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if BASELINE_VECT
+        baseline_vect(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if BASELINE_VECT_HOIST_INTERCHANGE_MEM
+        baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
+        #endif
+      }
         uint64_t t2 = rdtsc();
-        //print performances
-        printf("%.2f cycles/itération \n", (float)(t2-t1 ) / ((float) 20 * n *  NB_REPET));
-        /*
-        int valid=1;
-        for(int k=0;k<n;k++)
-        {
-			if(ap[k]!=a[k])
-			{
-				valid=0;
-			}
-		}
-		if(valid)
-		{
-			printf("Resultat valide : %f %f \n",a[0],ap[0]);
-		}
-		else
-		{
-			printf("Resultat non valide : %f %f \n",a[0],ap[0]);
-		}
-		*/
 
-    }
-		 //free tab
-		/*
+        uint64_t time = t2 - t1;
+		cycles[i] = (f64)(time) / (f64)(nb_bytes);
+
+        //measures; number of elements; elapsed cycles; cycles per element
+        fprintf(stdout, "%20llu; %20llu; %20llu; %15.3lf\n", i, nb_bytes, time, (f64)(time) / (f64)(nb_bytes));
+
+		//free tab
 		_mm_free(a);
 		_mm_free(b);
 		_mm_free(c);
-		_mm_free(d);
-		*/
-		_mm_free(ap);
-		_mm_free(bp);
-		_mm_free(cp);
-		_mm_free(dp);
-		
-		/*
-		free(a);
-		free(b);
-		free(c);
-		*/
-		/* 
-		//free(ap);
-		//free(bp);
-		//free(cp);
-		*/ 
-}
-void init_array(size_t size, float *tab )
-{
-    int i ;
-    for (i = 0 ; i < size ; i++)
-    {
-        tab[i] = (float)rand() / (float)RAND_MAX;
     }
+
+    //
+	sort(cycles, i);
+
+	//
+	f64 min, max, avg, mea, dev;
+
+	//
+	mea = mean(cycles, i);
+
+	//
+	dev = stddev(cycles, i);
+
+	//
+	min = cycles[0];
+	max = cycles[i - 1];
+	avg = (min + max) / 2.0;
+
+	//
+	fprintf(stderr, "\n\t\t\tmin: %5.3lf; max: %5.3lf; avg: %5.3lf; moy: %5.3lf; dev: %5.3lf %%;\n",
+		min,
+		max,
+		avg,
+		mea,
+		(dev * 100.0 / mea));
+
+	return 0;
 }
+// void init_array(size_t size, float *tab )
+// {
+//     int i ;
+//     for (i = 0 ; i < size ; i++)
+//     {
+//         tab[i] = (float)rand() / (float)RAND_MAX;
+//     }
+// }
