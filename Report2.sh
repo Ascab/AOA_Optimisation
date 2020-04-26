@@ -44,7 +44,7 @@ do
 		echo -n "plot " >> $dir"/plot_all.gp"
 		
 		#Going through invert code variants
-		for variant in "Phase2-std" "Phase2-simple-cond" "Phase2-loop-swap" "Phase2-unroll" "Phase2-total" "Phase2-simple-cond-parallel-6" "Phase2-loop-swap-parallel-6" "Phase2-unroll-parallel-6" "Phase2-total-parallel-6"
+		for variant in "Phase2-std" "Phase2-simple-cond" "Phase2-loop-swap" "Phase2-unroll" "Phase2-total" "Phase2-parallel-6" "Phase2-simple-cond-parallel-6" "Phase2-loop-swap-parallel-6" "Phase2-unroll-parallel-6" "Phase2-total-parallel-6"
 		do
 			
 			#
@@ -73,7 +73,7 @@ do
 		cd $dir"/"$comp
 
 		#Generate the plot
-		gnuplot -c "plot.gp" > "plot_"$cache"_"$comp".png"
+		gnuplot -c "plot.gp" > "plot_"$comp".png"
 
 		cd ../..
 

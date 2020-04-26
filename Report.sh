@@ -26,7 +26,7 @@ do
 	cp "plot_all.gp" $dir
 
 	#Compiler optimizations
-	for comp in "gcc" "icc"
+	for comp in "icc" #"gcc"
 	do
 		#
 		echo -e "\tRunning with compiler: "$comp

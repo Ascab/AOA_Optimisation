@@ -53,13 +53,7 @@ int main(int argc, char *argv[])
         //performances mesures
         uint64_t t1 = rdtsc();
         for (int k = 0 ; k < N_REPET ; k++)
-			#if BASELINE == 2
-				baseline_unroll(TAILLE_TAB, a,b,c,d);
-			#elif BASELINE == 1
-				baseline_loop_swap(TAILLE_TAB, a,b,c,d);
-			#else
-				baseline(TAILLE_TAB, a,b,c,d);
-			#endif
+			baseline(TAILLE_TAB, a,b,c,d);
         uint64_t t2 = rdtsc();
         
         uint64_t time = t2 - t1;
