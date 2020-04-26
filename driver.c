@@ -168,11 +168,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-// void init_array(size_t size, float *tab )
-// {
-//     int i ;
-//     for (i = 0 ; i < size ; i++)
-//     {
-//         tab[i] = (float)rand() / (float)RAND_MAX;
-//     }
-// }

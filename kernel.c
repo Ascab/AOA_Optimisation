@@ -2,7 +2,7 @@
 #include <omp.h>
 
 void baseline_vect_hoist_interchange_mem( unsigned n , float * restrict a  , float * restrict b ,
-float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
+float * restrict c , float * restrict d)
 {
     // all elements in b are assumed positive
 	unsigned k , i ;
@@ -27,7 +27,6 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 			{
 				ai += expf (d [ k ]); // c [ i ];
 			}
-			#pragma unroll_and_jam (5)
 			a[i]=ai*expf(bi)/ci;
 		}
 		else
@@ -38,14 +37,13 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 			{
 				ai+= (d [ k ]); // c [ i ];
 			}
-			#pragma unroll_and_jam (5)
 			a[i]=ai*bi/ci;
 		}
     }
 }
 
 void baseline_vect_hoist_interchange( unsigned n , float * restrict a  , float * restrict b ,
-float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
+float * restrict c , float * restrict d)
 {
     // all elements in b are assumed positive
 	unsigned k , i ;
@@ -82,16 +80,9 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 }
 
 void baseline_vect ( unsigned n , float * restrict a  , float * restrict b ,
-float * restrict c , float * restrict d) //(const unsigned n , float * restrict a , float * restrict b , float * restrict c ,float * restrict d)
+float * restrict c , float * restrict d)
 {
     // all elements in b are assumed positive
-    /*
-	float *al=__builtin_assume_aligned(a,32);
-	float *bl=__builtin_assume_aligned(b,32);
-	float *cl=__builtin_assume_aligned(c,32);
-	float *dl=__builtin_assume_aligned(d,32);
-
-	*/
 	unsigned k , i ;
     for ( k =0; k < 20; k ++)
     {
