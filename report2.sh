@@ -47,20 +47,18 @@ do
 		for variant in vect_hoist_interchange_mem vect_hoist_interchange vect_hoist_interchange_mem_parallel vect_hoist_interchange_parallel vect baseline
 		do
 			#
+
 			echo -e "\t\tVariant: "$variant
       def=` echo $variant | tr '[:lower:]' '[:upper:]' `
 			#Compile variant
-      echo "[ COMPILING ]"
 			make $cache"-"$variant CC=$comp CACHE=$cache DEFINE=$def >> $dir"/logs/compile.log" 2>> $dir"/logs/compile_err.log"
-      echo "[ RUNNING ]"
 			#Run & select run number & cycles
 			./prog  | cut -d';' -f1,4 > $dir"/"$comp"/data/"$variant
-      echo "[ MAQAO ]"
 			#Run with maqao
 			maqao oneview -R1 binary="prog" run_command="<binary>" lprof_params="--use-OS-timers" --xp=$dir"/maqao_"$cache"_"$comp"_"$variant >> $dir"/logs/maqao_reports.log"
 
 			#setting individual plots
-			echo -n "\"data/"$variant"\" w lp t t \""` echo $variant | tr '_' '-' `"\", " >> $dir"/"$comp"/plot.gp"
+			echo -n "\"data/"$variant"\" w lp t \""` echo $variant | tr '_' '-' `"\", " >> $dir"/"$comp"/plot.gp"
 
 			#setting general plot
 			echo -n "\""$comp"/data/"$variant"\" w lp t \"" `echo $variant | tr '_' '-' `"\", " >> $dir"/plot_all.gp"

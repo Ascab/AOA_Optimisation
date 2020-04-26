@@ -1,0 +1,20 @@
+L3 :
+Cache L3 de 6 MiB
+Cache L2 de 256 Kib
+
+On doit occuper entre 1*3 = 768 Kib et 1/2 * 6 = 3MiB
+3 tableau de n cases + 1 tableau de 20 chaque case faisant 4B
+
+768 KiB < 80 + 3 * n * 4 < 3MiB
+65 529 < n <  262 137
+
+
+RAM :
+RAM de 8 GiB
+Chache L3 de 6MiB
+
+Occuper 3 entre 6 * 3 = 18 MiB et 8 GiB
+3 tableau de n cases + 1 tableau de 20 chaque case faisant 4B
+
+18 MiB < 80 + 3 * n * 4 < 8GiB
+1 572 857 < n <  536 870 905

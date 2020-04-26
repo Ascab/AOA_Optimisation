@@ -4,8 +4,8 @@ OBJ =driver.o kernel.o rdtsc.o
 CFLAGS =-Wall -g
 LDFLAGS =-lm
 EXE=prog
-L3=-DN_WARMUP=15 -DN_MESURES=10 -DN_REPET=31 -DTAILLE_TAB=500000
-RAM=-DN_WARMUP=15 -DN_MESURES=10 -DN_REPET=31 -DTAILLE_TAB=1500000
+L3=-DN_WARMUP=15 -DN_MESURES=31 -DN_REPET=10 -DTAILLE_TAB=200000
+RAM=-DN_WARMUP=15 -DN_MESURES=31 -DN_REPET=10 -DTAILLE_TAB=2000000
 ifeq ($(CC),icc)
 	BOOST=-xHost -qopenmp
 else
@@ -54,6 +54,6 @@ mrproper: clean
 %-baseline : kernel.c driver.o rdtsc.o common.o
 	$(CC) -O3 $^ -o prog -lm $(BOOST) -D$(DEFINE)=1
 %-vect_hoist_interchange_parallel : kernel.c driver.o rdtsc.o common.o
-	$(CC) -O3 $^ -o prog -lm $(BOOST) -D$(DEFINE)=1 -DPARALLEL=1
+	$(CC) -O3 $^ -o prog -lm $(BOOST) -D$(DEFINE)=1
 %-vect_hoist_interchange_mem_parallel : kernel.c driver.o rdtsc.o common.o
-	$(CC) -O3 $^ -o prog -lm $(BOOST) -D$(DEFINE)=1 -DPARALLEL = 1
+	$(CC) -O3 $^ -o prog -lm $(BOOST) -D$(DEFINE)=1

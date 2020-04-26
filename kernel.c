@@ -9,7 +9,9 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 	float bi=0.0,ci=0.0,ai=0.0;
 	#pragma ivdep
 	#pragma vector aligned
-  #if PARALLEL
+  #if VECT_HOIST_INTERCHANGE_MEM_PARALLEL
+	omp_set_dynamic(0);
+	omp_set_num_threads(4);
 	#pragma omp parallel for
   #endif
     for( i =0; i < n ; i ++)
@@ -49,7 +51,9 @@ float * restrict c , float * restrict d) //(const unsigned n , float * restrict 
 	unsigned k , i ;
 	#pragma ivdep
 	#pragma vector aligned
-  #if PARALLEL
+  #if VECT_HOIST_INTERCHANGE_PARALLEL
+	omp_set_dynamic(0);
+	omp_set_num_threads(4);
 	#pragma omp parallel for
   #endif
     for( i =0; i < n ; i ++)

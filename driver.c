@@ -70,27 +70,29 @@ int main(int argc, char *argv[])
       {
         uint64_t start = rdtsc();
         #if BASELINE
-        baseline(TAILLE_TAB, a,b,c,d);
+          baseline(TAILLE_TAB, a,b,c,d);
         #endif
         #if VECT_HOIST_INTERCHANGE
-        baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
+          baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
         #endif
         #if VECT
-        baseline_vect(TAILLE_TAB, a,b,c,d);
+          baseline_vect(TAILLE_TAB, a,b,c,d);
         #endif
         #if VECT_HOIST_INTERCHANGE_MEM
-        baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
+          baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
         #endif
+
         uint64_t stop = rdtsc();
         diff[r] = stop - start;
-        for (int r = 0 ; r < N_REPET : r++)
+        for (int r = 0 ; r < N_REPET ; r++)
+        {
           printf("%.3f\n", (float)diff[r] / (float)(TAILLE_TAB * 20);
-
+        }
           _mm_free(a);
           _mm_free(b);
           _mm_free(c);
       }
-    #else
+     #else
 		a = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
 		b = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
 		c = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
@@ -103,7 +105,8 @@ int main(int argc, char *argv[])
 
         //performances mesures
         uint64_t t1 = rdtsc();
-        for (int k = 0 ; k < N_REPET ; k++){
+        for (int k = 0 ; k < N_REPET ; k++)
+        {
         #if BASELINE
         baseline(TAILLE_TAB, a,b,c,d);
         #endif
@@ -115,6 +118,12 @@ int main(int argc, char *argv[])
         #endif
         #if VECT_HOIST_INTERCHANGE_MEM
         baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if VECT_HOIST_INTERCHANGE_MEM_PARALLEL
+        baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if VECT_HOIST_INTERCHANGE_PARALLEL
+        baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
         #endif
       }
         uint64_t t2 = rdtsc();
