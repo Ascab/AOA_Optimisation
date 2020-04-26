@@ -51,6 +51,6 @@ void init_array(u64 size, float *tab )
     int i ;
     for (i = 0 ; i < size ; i++)
     {
-        tab[i] = 2.0 * (float)(rand()) / RAND_MAX;
+        tab[i] = 2.0 *(float)(rand()) / RAND_MAX;
     }
 }

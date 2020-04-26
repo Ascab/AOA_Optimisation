@@ -5,6 +5,7 @@
 #include <xmmintrin.h>
 #include <mmintrin.h>
 #include "common.h"
+
 extern uint64_t rdtsc ();
 
 void baseline ( unsigned n , float a [ n ] , float b [ n ] ,
@@ -35,13 +36,13 @@ int main(int argc, char *argv[])
     #if BASELINE
     baseline(TAILLE_TAB, a,b,c,d);
     #endif
-    #if BASELINE_VECT_HOIST_INTERCHANGE
+    #if VECT_HOIST_INTERCHANGE
     baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
     #endif
-    #if BASELINE_VECT
+    #if VECT
     baseline_vect(TAILLE_TAB, a,b,c,d);
     #endif
-    #if BASELINE_VECT_HOIST_INTERCHANGE_MEM
+    #if VECT_HOIST_INTERCHANGE_MEM
     baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
     #endif
 	}
@@ -53,6 +54,43 @@ int main(int argc, char *argv[])
 
     for(i = 0 ; i < N_MESURES ; i++)
     {
+      #if ALT_DRIVER
+      #include <unistd.h>
+      uint64_t diff[N_MESURES] ;
+
+      a = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+      b = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+      c = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
+
+      srand(42);
+      init_array(TAILLE_TAB, a);
+      init_array(TAILLE_TAB, b);
+      init_array(TAILLE_TAB, c);
+      for (int r=0 ; r < N_MESURES ; r++)
+      {
+        uint64_t start = rdtsc();
+        #if BASELINE
+        baseline(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if VECT_HOIST_INTERCHANGE
+        baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if VECT
+        baseline_vect(TAILLE_TAB, a,b,c,d);
+        #endif
+        #if VECT_HOIST_INTERCHANGE_MEM
+        baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
+        #endif
+        uint64_t stop = rdtsc();
+        diff[r] = stop - start;
+        for (int r = 0 ; r < N_REPET : r++)
+          printf("%.3f\n", (float)diff[r] / (float)(TAILLE_TAB * 20);
+
+          _mm_free(a);
+          _mm_free(b);
+          _mm_free(c);
+      }
+    #else
 		a = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
 		b = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
 		c = (float*)_mm_malloc(TAILLE_TAB*sizeof(float), 32);
@@ -69,13 +107,13 @@ int main(int argc, char *argv[])
         #if BASELINE
         baseline(TAILLE_TAB, a,b,c,d);
         #endif
-        #if BASELINE_VECT_HOIST_INTERCHANGE
+        #if VECT_HOIST_INTERCHANGE
         baseline_vect_hoist_interchange(TAILLE_TAB, a,b,c,d);
         #endif
-        #if BASELINE_VECT
+        #if VECT
         baseline_vect(TAILLE_TAB, a,b,c,d);
         #endif
-        #if BASELINE_VECT_HOIST_INTERCHANGE_MEM
+        #if VECT_HOIST_INTERCHANGE_MEM
         baseline_vect_hoist_interchange_mem(TAILLE_TAB, a,b,c,d);
         #endif
       }
@@ -91,6 +129,7 @@ int main(int argc, char *argv[])
 		_mm_free(a);
 		_mm_free(b);
 		_mm_free(c);
+    #endif
     }
 
     //
